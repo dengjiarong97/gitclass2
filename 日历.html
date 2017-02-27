@@ -1,0 +1,227 @@
+<!DOCTYPE html>
+<html>
+	<head>
+		<meta charset="utf-8" />
+		<title>日历</title>
+		<style>
+			*{
+				margin: 0;
+				padding: 0;
+			}
+			#box{
+				width: 352px;
+				height: 482px;
+				padding: 20px;
+				background: #272c3d;
+				box-sizing:border-box;
+				position: absolute;
+				left: 0;right: 0;bottom: 0;top: 0;
+				margin: auto;
+				color:white;
+				font-size:14px; 
+				box-shadow:0 0 0 5px blueviolet,
+				0 0 0 10px #fff,
+				0 0 0 15px #8A2BE2,
+				4px 4px 3px 16px rgba(0,0,0,.5);
+			}
+			.head{
+				width: 100%;
+				height: 81px;
+				cursor:context-menu;
+			}
+			.head .p1{
+				font-size:30px;
+				padding-top: 15px;
+			}
+			.head .p2{
+				/*font-size:30px;*/
+				padding-top: 10px;
+				color:#598fff;
+			}
+			.nav{
+				width: 100%;
+				height: 33px;
+				box-sizing:border-box;
+				cursor:context-menu;
+			}
+			.nav div{
+				display:inline-block;
+			}
+			.nav .button{
+				float:right;
+				text-align: center;
+			}
+			.nav .button span{
+				display:inline-block;
+				width: 30px;
+				height: 18px;
+				cursor: pointer;
+			}
+			.nav .button span:hover{
+				border: 1px solid #fff;
+				box-sizing:border-box;
+				line-height:14px;
+			}
+			.nav .button span:active{
+				background: darkorange;
+			}
+			.content{
+				width: 100%;
+				height: 328px;
+				box-sizing:border-box;
+				cursor:context-menu;
+			}
+			.content li{
+				list-style:none;
+				float:left;
+				width: 43px;
+				height: 35px;
+				text-align: center;
+				line-height:35px;
+				font-size:16px;	
+				margin-bottom:10px;	
+				box-sizing:border-box;
+			}
+			.content li:hover{
+				border: 1px solid rgb(255,255,255);
+				line-height:33px;
+			}
+			.content .active{
+				border: 1px solid rgb(255,255,255);
+				background: yellowgreen;
+				line-height:33px;
+			}
+			.lastMonth{
+				opacity:.5;
+			}
+		</style>
+	</head>
+	<body>
+		<div id="box" onselectstart="return false">
+			<div class="head">
+				<p class="p1">00:00:00</p>
+				<p class="p2">2000年01月01日 星期一</p>
+			</div>
+			<div class="nav"><div class="time"><span>2000</span>年 <span>01</span>月<span></div><div class="button"><span>上</span><span>下</span></div></div>
+			<div class="content">
+				<ul class="week">
+					<li>日</li>
+					<li>一</li>
+					<li>二</li>
+					<li>三</li>
+					<li>四</li>
+					<li>五</li>
+					<li>六</li>
+				</ul>
+				<ul class="day"></ul>
+			</div>
+		</div>
+		<script>
+			//获取头部
+			var head=document.getElementsByClassName('head')[0];
+			var head_p1=head.getElementsByClassName('p1')[0];
+			var head_p2=head.getElementsByClassName('p2')[0];
+			//获取导部位份
+			var nav=document.getElementsByClassName('nav')[0];
+			var nav_time=nav.getElementsByClassName('time')[0];
+			var nav_timeYear=nav_time.getElementsByTagName('span')[0];
+			var nav_timeMonth=nav_time.getElementsByTagName('span')[1];
+			var nav_button=nav.getElementsByClassName('button')[0];
+			var navPrev=nav_button.getElementsByTagName('span')[0];
+			var navNext=nav_button.getElementsByTagName('span')[1];
+			//获取内容部分
+			var content=document.getElementsByClassName('content')[0];
+			var content_day=document.getElementsByClassName('day')[0];
+			
+			var oDate=new Date();//获取系统时间
+			var year=oDate.getFullYear();//获取年
+			var month=oDate.getMonth()+1;//获取月
+			var week=oDate.getDay();//获取星期
+			var day=oDate.getDate();//获取天
+			var hour=oDate.getHours();//获取小时
+			var min=oDate.getMinutes();//获取分钟
+			var second=oDate.getSeconds();//获取秒
+			
+			var weekArr=['日','一','二','三','四','五','六'];
+			//上一个按钮
+			navPrev.onclick=function() {
+				month--;
+				if(month<1){
+					month=12;
+					year--;
+				}
+				date(year,month,day);
+			}
+			//下一个按钮
+			navNext.onclick=function() {
+				month++;
+				if(month>12){
+					month=1;
+					year++;
+				}
+				date(year,month,day);
+			}
+			//每秒刷新一次时间
+			setInterval(time,1000);
+			time();
+			function time(){
+				var oDate2=new Date();
+				var year2=oDate2.getFullYear();
+				var month2=oDate2.getMonth()+1;
+				var week2=oDate2.getDay();
+				var day2=oDate2.getDate();
+				var hour2=oDate2.getHours();
+				var min2=oDate2.getMinutes();
+				var second2=oDate2.getSeconds();
+				head_p1.innerHTML=roize(hour2)+':'+roize(min2)+':'+roize(second2);
+				if(hour+min+second==0){//判断有没过完一天
+					window.day++;
+					date(year2,month2,day2);
+				}
+			}
+			//生成日期
+			date(year,month,day);
+			function date(year,month,day){
+				var week = getMonth(year,month,1);//获取一号是星期几
+				var currentMonth = getMonth(year,month,0);//获取某月有几日
+				var lastMonth = getMonth(year,month-1,0);//获取某月有几日
+				
+				content_day.innerHTML='';
+				head_p2.innerHTML=year+'年'+month+'月'+day+'日 星期'+weekArr[week];
+				nav_timeYear.innerHTML=year;
+				nav_timeMonth.innerHTML=roize(month);
+				if(week==0){
+					week=7;
+				}
+				var star = lastMonth-week;
+				
+				for(var i=star;i<lastMonth;i++){
+					content_day.innerHTML+='<li class="lastMonth">'+(i+1)+'</li>';
+				}
+				for(var i=0;i<currentMonth;i++){
+					if(i==day-1){
+						content_day.innerHTML+='<li class="active">'+(i+1)+'</li>';
+					}else{
+						content_day.innerHTML+='<li>'+(i+1)+'</li>';
+					}
+				}
+				var end=42-(currentMonth+week);
+				for(var i=0;i<end;i++){
+					content_day.innerHTML+='<li class="lastMonth">'+(i+1)+'</li>';
+				}
+			}
+			//补零函数
+			function roize(n){
+				return n=n<10?'0'+n:''+n;
+			}
+			/*获取某月信息的函数：
+			 * 参数一：年份；参数二：月份； 参数三: 传一就是获取某年
+			 * 的某月的一号是星期几、传零就是获取某年某月有多少天 */
+			function getMonth(year,month,day) {
+				var get=null;
+				day?get='getDay':get='getDate';
+				return new Date(year,month-day,day)[get]();
+			}
+		</script>
+	</body>
+</html>
